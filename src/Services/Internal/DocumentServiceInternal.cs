@@ -106,7 +106,7 @@ namespace EasierDocuware.Services.Internal
             }
         }
 
-        public async Task<ServiceResult<bool>> ForceUpdateBatchAppendKeywordIndexFields(string fileCabinetId, List<int> documentIds, string keywordsFieldName, List<string> keywordValues, string storeDialogId, bool forceUpdate)
+        public async Task<ServiceResult<bool>> BatchUpdateKeywordIndexFieldsAsync(string fileCabinetId, List<int> documentIds, string keywordsFieldName, List<string> keywordValues, string storeDialogId, bool forceUpdate)
         {
             try
             {
