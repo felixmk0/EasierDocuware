@@ -42,7 +42,6 @@ namespace EasierDocuware.Services.Internal
             }
         }
 
-
         public async Task<ServiceResult<bool>> UpdateDocFieldsAsync(Document doc, Dictionary<string, string> fields, bool forceUpdate)
         {
             try
@@ -135,6 +134,7 @@ namespace EasierDocuware.Services.Internal
         }
 
 
+        // HELPER METHOD TO GET ALL DOCUMENTS (PAGINATION)
         private async Task GetAllDocumentsAsync(DocumentsQueryResult queryResult, List<Document> documents)
         {
             documents.AddRange(queryResult.Items);
