@@ -16,5 +16,6 @@ namespace EasierDocuware.Services.Public
 
 
         public Task<ServiceResult<bool>> ConnectAsync(string url, string username, string password) => _internalAuthService.ConnectAsync(url, username, password);
+        public Task<ServiceResult<bool>> DisconnectAsync() => _internalAuthService.DisconnectAsync();
     }
 }

@@ -42,7 +42,7 @@ namespace EasierDocuware.Services.Internal
             }
         }
 
-        public async Task<ServiceResult<Document>> GetDocumentByIdAsync(string fileCabinetId, string docId)
+        public async Task<ServiceResult<Document>> GetDocumentByIdAsync(string fileCabinetId, int docId)
         {
             try
             {
@@ -53,7 +53,7 @@ namespace EasierDocuware.Services.Internal
                 var docs = await GetDocumentsByFileCabinetIdAsync(fileCabinetId);
                 if (!docs.Success) return ServiceResult<Document>.Fail(docs.Message!);
 
-                var doc = docs.Data!.FirstOrDefault(d => d.Id.ToString() == docId);
+                var doc = docs.Data!.FirstOrDefault(d => d.Id == docId);
                 if (doc == null) return ServiceResult<Document>.Fail("Document not found.");
 
                 return ServiceResult<Document>.Ok(doc);
@@ -174,7 +174,7 @@ namespace EasierDocuware.Services.Internal
             }
         }
 
-        public async Task<ServiceResult<List<DocumentIndexField>>> GetDocFieldsAsync(string fileCabinetId, string docId)
+        public async Task<ServiceResult<List<DocumentIndexField>>> GetDocFieldsAsync(string fileCabinetId, int docId)
         {
             try
             {
@@ -193,6 +193,33 @@ namespace EasierDocuware.Services.Internal
             catch (Exception ex)
             {
                 return ServiceResult<List<DocumentIndexField>>.Fail(ex.Message);
+            }
+        }
+
+        public async Task<ServiceResult<DocumentFileDownload>> DownloadDocumentAsync(string fileCabinetId, int docId)
+        {
+            try
+            {
+                var authResult = _authServiceInternal.IsConnectedAsync();
+                if (!authResult.Success) return ServiceResult<DocumentFileDownload>.Fail(authResult.Message!);
+                var connection = authResult.Data!;
+
+                var documentResponse = await connection.GetFromDocumentForDocumentAsync(docId, fileCabinetId);
+                if (!documentResponse.IsSuccessStatusCode) return ServiceResult<DocumentFileDownload>.Fail($"Failed to get document. Status code: {documentResponse.StatusCode}, Message: {documentResponse.Exception.Message}");
+                var document = documentResponse.Content;
+
+                var documentDownloadResponse = await DownloadDocumentContentAsync(document);
+                if (!documentDownloadResponse.Success) return ServiceResult<DocumentFileDownload>.Fail(documentDownloadResponse.Message!);
+                var downloadedFile = documentDownloadResponse.Data!;
+
+                using (var file = File.Create(downloadedFile.FileName))
+                using (var stream = downloadedFile.Stream) await stream.CopyToAsync(file);
+
+                return ServiceResult<DocumentFileDownload>.Ok(downloadedFile);
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<DocumentFileDownload>.Fail(ex.Message);
             }
         }
 
@@ -225,10 +252,47 @@ namespace EasierDocuware.Services.Internal
         */
 
 
-        private async Task GetAllDocumentsAsync(DocumentsQueryResult queryResult, List<Document> documents)
+        private static async Task GetAllDocumentsAsync(DocumentsQueryResult queryResult, List<Document> documents)
         {
             documents.AddRange(queryResult.Items);
             if (queryResult.NextRelationLink != null) await GetAllDocumentsAsync(await queryResult.GetDocumentsQueryResultFromNextRelationAsync(), documents);
+        }
+
+
+        private static async Task<ServiceResult<DocumentFileDownload>> DownloadDocumentContentAsync(Document document)
+        {
+            try
+            {
+                if (document.FileDownloadRelationLink == null)
+                {
+                    var docResponse = await document.GetDocumentFromSelfRelationAsync().ConfigureAwait(false);
+                    if (!docResponse.IsSuccessStatusCode) return ServiceResult<DocumentFileDownload>.Fail($"Failed to refresh document. Status code: {docResponse.StatusCode}, Message: {docResponse.Exception.Message}");
+                    document = docResponse.Content;
+                }
+
+                var downloadResponse = await document.PostToFileDownloadRelationForStreamAsync(
+                    new FileDownload()
+                    {
+                        TargetFileType = FileDownloadType.Auto
+                    });
+
+                if (!downloadResponse.IsSuccessStatusCode) return ServiceResult<DocumentFileDownload>.Fail($"Download failed with status code {downloadResponse.StatusCode}: {downloadResponse.Exception.Message}");
+
+                var contentHeaders = downloadResponse.ContentHeaders;
+                var documentDownload = new DocumentFileDownload()
+                {
+                    Stream = downloadResponse.Content,
+                    ContentLength = contentHeaders.ContentLength,
+                    ContentType = contentHeaders.ContentType!.MediaType!,
+                    FileName = contentHeaders.ContentDisposition!.FileName!
+                };
+
+                return ServiceResult<DocumentFileDownload>.Ok(documentDownload);
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<DocumentFileDownload>.Fail(ex.Message);
+            }
         }
     }
 }

@@ -31,6 +31,23 @@ namespace EasierDocuware.Services.Internal
             }
         }
 
+        public async Task<ServiceResult<bool>> DisconnectAsync()
+        {
+            try
+            {
+                if (_serviceConnection == null) return ServiceResult<bool>.Fail("No active connection to disconnect.");
+
+                await _serviceConnection.DisconnectAsync();
+                _serviceConnection = null!;
+
+                return ServiceResult<bool>.Ok(true);
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<bool>.Fail(ex.Message);
+            }
+        }
+
         ServiceResult<ServiceConnection> IAuthServiceInternal.IsConnectedAsync()
         {
             try

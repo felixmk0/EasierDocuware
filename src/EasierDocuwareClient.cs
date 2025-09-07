@@ -45,6 +45,12 @@ namespace EasierDocuware
         /// <returns>A <see cref="ServiceResult{bool}"/> indicating success or failure.</returns>
         public Task<ServiceResult<bool>> ConnectAsync(string url, string username, string password) => _authService.ConnectAsync(url, username, password);
 
+        /// <summary>
+        /// Disconnects from the DocuWare server.
+        /// </summary>
+        /// <returns>A <see cref="ServiceResult{bool}"/> indicating success or failure.</returns>
+        public Task<ServiceResult<bool>> DisconnectAsync() => _authService.DisconnectAsync();
+
 
 
         ////////////////////////////////////////////////////////////////////
@@ -84,7 +90,7 @@ namespace EasierDocuware
         /// <param name="fileCabinetId">The file cabinet ID.</param>
         /// <param name="docId">The document ID.</param>
         /// <returns>A <see cref="ServiceResult{Document}"/> containing the document or an error message.</returns>
-        public async Task<ServiceResult<Document>> GetDocumentByIdAsync(string fileCabinetId, string docId) => await _documentService.GetDocumentByIdAsync(fileCabinetId, docId);
+        public async Task<ServiceResult<Document>> GetDocumentByIdAsync(string fileCabinetId, int docId) => await _documentService.GetDocumentByIdAsync(fileCabinetId, docId);
 
         /// <summary>
         /// Updates a single document's fields asynchronously.
@@ -130,7 +136,15 @@ namespace EasierDocuware
         /// <param name="fileCabinetId">The file cabinet ID.</param>
         /// <param name="docId">The document ID.</param>
         /// <returns>A <see cref="ServiceResult{List{DocumentIndexField}}"/> containing document fields or an error message.</returns>
-        public async Task<ServiceResult<List<DocumentIndexField>>> GetDocFieldsAsync(string fileCabinetId, string docId) => await _documentService.GetDocFieldsAsync(fileCabinetId, docId);
+        public async Task<ServiceResult<List<DocumentIndexField>>> GetDocFieldsAsync(string fileCabinetId, int docId) => await _documentService.GetDocFieldsAsync(fileCabinetId, docId);
+
+        /// <summary>
+        /// Downloads a document asynchronously.
+        /// </summary>
+        /// <param name="fileCabinetId">The file cabinet ID.</param>
+        /// <param name="docId">The document ID.</param>
+        /// <returns>A <see cref="ServiceResult{DocumentFileDownload}"/> containing the file stream with other details or an error message.</returns>
+        public Task<ServiceResult<DocumentFileDownload>> DownloadDocumentAsync(string fileCabinetId, int docId) => _documentService.DownloadDocumentAsync(fileCabinetId, docId);
 
 
 
