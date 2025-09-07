@@ -16,24 +16,9 @@ namespace EasierDocuware.Services.Internal
         }
 
 
-        public Task<ServiceResult<bool>> UpdateDocFieldsAsync(Document doc, Dictionary<string, string> fields, bool forceUpdate)
-        {
-            return _documentServiceInternal.UpdateDocFieldsAsync(doc, fields, forceUpdate);
-        }
-
-        public Task<ServiceResult<bool>> BatchUpdateDocFieldsAsync(string fileCabinetId, List<int> documentIds, Dictionary<string, string> fields, bool forceUpdate)
-        {
-            return _documentServiceInternal.BatchUpdateDocFieldsAsync(fileCabinetId, documentIds, fields, forceUpdate);
-        }
-
-        public Task<ServiceResult<bool>> BatchUpdateKeywordIndexFieldsAsync(string fileCabinetId, List<int> documentIds, string keywordsFieldName, List<string> keywordValues, string storeDialogId, bool forceUpdate)
-        {
-            return _documentServiceInternal.BatchUpdateKeywordIndexFieldsAsync(fileCabinetId, documentIds, keywordsFieldName, keywordValues, storeDialogId, forceUpdate);
-        }
-
-        public Task<ServiceResult<List<Document>>> GetDocumentsByFileCabinetIdAsync(string fileCabinetId, int? count = 10000)
-        {
-            return _documentServiceInternal.GetDocumentsByFileCabinetIdAsync(fileCabinetId, count);
-        }
+        public Task<ServiceResult<bool>> UpdateDocFieldsAsync(Document doc, Dictionary<string, string> fields, bool forceUpdate) => _documentServiceInternal.UpdateDocFieldsAsync(doc, fields, forceUpdate);
+        public Task<ServiceResult<bool>> BatchUpdateDocFieldsAsync(string fileCabinetId, List<int> documentIds, Dictionary<string, string> fields, bool forceUpdate) => _documentServiceInternal.BatchUpdateDocFieldsAsync(fileCabinetId, documentIds, fields, forceUpdate);
+        public Task<ServiceResult<bool>> BatchUpdateKeywordIndexFieldsAsync(string fileCabinetId, List<int> documentIds, string keywordsFieldName, List<string> keywordValues, string storeDialogId, bool forceUpdate) => _documentServiceInternal.BatchUpdateKeywordIndexFieldsAsync(fileCabinetId, documentIds, keywordsFieldName, keywordValues, storeDialogId, forceUpdate);
+        public Task<ServiceResult<List<Document>>> GetDocumentsByFileCabinetIdAsync(string fileCabinetId, int? count = 10000) => _documentServiceInternal.GetDocumentsByFileCabinetIdAsync(fileCabinetId, count);
     }
 }

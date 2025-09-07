@@ -15,15 +15,8 @@ namespace EasierDocuware.Services.Internal
             _fileCabinetServiceInternal = fileCabinetServiceInternal;
         }
 
-        
-        public ServiceResult<FileCabinet> GetFileCabinetById(string fileCabinetId)
-        {
-            return _fileCabinetServiceInternal.GetFileCabinetById(fileCabinetId);
-        }
-        
-        public Task<ServiceResult<List<FileCabinet>>> GetFileCabinetsAsync()
-        {
-            return _fileCabinetServiceInternal.GetFileCabinetsAsync();
-        }
+
+        public ServiceResult<FileCabinet> GetFileCabinetById(string fileCabinetId) => _fileCabinetServiceInternal.GetFileCabinetById(fileCabinetId);
+        public Task<ServiceResult<List<FileCabinet>>> GetFileCabinetsAsync() => _fileCabinetServiceInternal.GetFileCabinetsAsync();
     }
 }

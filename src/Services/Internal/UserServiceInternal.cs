@@ -24,7 +24,7 @@ namespace EasierDocuware.Services.Internal
                 var org = orgResult.Data!;
 
                 NewUser createUser = new NewUser
-                {
+                { 
                     DbName = userName,
                     Name = userName,
                     Email = userEmail,
