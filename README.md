@@ -8,11 +8,17 @@ Additionally, EasierDocuWare includes extra features not available in the offici
 
 - [x] **Authentication**  
   - Connect to DocuWare server with credentials (`ConnectAsync`).
+- [x] **Organizations**  
+  - Retrieve default organization (`GetOrganization`).  
+  - Retrieve all organizations (`GetOrganizationsAsync`).  
 - [x] **File Cabinets**  
   - Retrieve all file cabinets (`GetFileCabinetsAsync`).  
   - Retrieve a file cabinet by ID (`GetFileCabinetById`).  
 - [x] **Documents**  
-  - Retrieve documents from a file cabinet (`GetDocumentsByFileCabinetIdAsync`).  
+  - Retrieve documents from a file cabinet (`GetDocumentsByFileCabinetIdAsync`).
+  - Retrieve a document by ID (`GetDocumentByIdAsync`).
+  - Retrieve document fields by document (`GetDocFieldsAsync`).
+  - Retrieve document fields by file cabinet and document ID (`GetDocFieldsAsync`).
   - Update single document fields (`UpdateDocFieldsAsync`).  
   - Batch update multiple documents (`BatchUpdateDocFieldsAsync`).
   - Batch update multiple documents keyword index fields (`BatchUpdateKeywordIndexFieldsAsync`)
@@ -25,3 +31,5 @@ Clone the repo and reference the project in your solution:
 
 ```bash
 git clone https://github.com/felixmk0/EasierDocuware.git
+
+
