@@ -42,6 +42,28 @@ namespace EasierDocuware.Services.Internal
             }
         }
 
+        public async Task<ServiceResult<Document>> GetDocumentByIdAsync(string fileCabinetId, string docId)
+        {
+            try
+            {
+                var authResult = _authServiceInternal.IsConnectedAsync();
+                if (!authResult.Success) return ServiceResult<Document>.Fail(authResult.Message!);
+                var _serviceConnection = authResult.Data!;
+
+                var docs = await GetDocumentsByFileCabinetIdAsync(fileCabinetId);
+                if (!docs.Success) return ServiceResult<Document>.Fail(docs.Message!);
+
+                var doc = docs.Data!.FirstOrDefault(d => d.Id.ToString() == docId);
+                if (doc == null) return ServiceResult<Document>.Fail("Document not found.");
+
+                return ServiceResult<Document>.Ok(doc);
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<Document>.Fail(ex.Message);
+            }
+        }
+
         public async Task<ServiceResult<bool>> UpdateDocFieldsAsync(Document doc, Dictionary<string, string> fields, bool forceUpdate)
         {
             try
@@ -134,7 +156,75 @@ namespace EasierDocuware.Services.Internal
         }
 
 
-        // HELPER METHOD TO GET ALL DOCUMENTS (PAGINATION)
+        public async Task<ServiceResult<List<DocumentIndexField>>> GetDocFieldsAsync(Document document)
+        {
+            try
+            {
+                var response = await document.GetDocumentIndexFieldsFromFieldsRelationAsync();
+                if (!response.IsSuccessStatusCode) return ServiceResult<List<DocumentIndexField>>.Fail($"Get fields failed with status code {response.StatusCode}: {response.Exception.Message}");
+
+                var docFields = response.Content.Field;
+                if (docFields == null) return ServiceResult<List<DocumentIndexField>>.Fail("No fields found for the document.");
+
+                return ServiceResult<List<DocumentIndexField>>.Ok(docFields);
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<List<DocumentIndexField>>.Fail(ex.Message);
+            }
+        }
+
+        public async Task<ServiceResult<List<DocumentIndexField>>> GetDocFieldsAsync(string fileCabinetId, string docId)
+        {
+            try
+            {
+                var docResult = await GetDocumentByIdAsync(fileCabinetId, docId);
+                if (!docResult.Success) return ServiceResult<List<DocumentIndexField>>.Fail(docResult.Message!);
+                var document = docResult.Data!;
+
+                var response = await document.GetDocumentIndexFieldsFromFieldsRelationAsync();
+                if (!response.IsSuccessStatusCode) return ServiceResult<List<DocumentIndexField>>.Fail($"Get fields failed with status code {response.StatusCode}: {response.Exception.Message}");
+
+                var docFields = response.Content.Field;
+                if (docFields == null) return ServiceResult<List<DocumentIndexField>>.Fail("No fields found for the document.");
+
+                return ServiceResult<List<DocumentIndexField>>.Ok(docFields);
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<List<DocumentIndexField>>.Fail(ex.Message);
+            }
+        }
+
+
+        // UTILITZA EL NOM INTERN DEL CAMP/COLUMNA DE LA DB)
+        // FALTA CANBIAR I MILLOR UTILITZAR DIALOG EXPRESSION
+        /*
+        public async Task<ServiceResult<List<Document>>> SearchDocFieldsAsync(string fileCabinetId, Dictionary<string, object> fields)
+        {
+            try
+            {
+                var fileCabinetDocsResult = await GetDocumentsByFileCabinetIdAsync(fileCabinetId);
+                if (!fileCabinetDocsResult.Success) return ServiceResult<List<Document>>.Fail(fileCabinetDocsResult.Message!);
+
+                var docs = fileCabinetDocsResult.Data!;
+
+                var matchedDocs = docs.Where(d => fields.All(f =>
+                    d.Fields.Any(df => df.FieldName == f.Key && df.Item == f.Value)
+                )).ToList();
+
+                if (matchedDocs.IsNullOrEmpty()) return ServiceResult<List<Document>>.Fail("No documents matched the search criteria.");
+
+                return ServiceResult<List<Document>>.Ok(matchedDocs);
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<List<Document>>.Fail(ex.Message);
+            }
+        }
+        */
+
+
         private async Task GetAllDocumentsAsync(DocumentsQueryResult queryResult, List<Document> documents)
         {
             documents.AddRange(queryResult.Items);
