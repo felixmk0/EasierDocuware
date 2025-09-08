@@ -24,6 +24,8 @@ Additionally, EasierDocuWare includes extra features not available in the offici
   - Batch update multiple documents (`BatchUpdateDocFieldsAsync`).
   - Batch update multiple documents keyword index fields (`BatchUpdateKeywordIndexFieldsAsync`).
   - Download a document (stream) by document and file cabinet ID (`DownloadDocumentAsync`).
+  - Export a document as a DWX file by document and file cabinet ID (`ExportDocumentAsDwxAsync`).
+  - Import a DWX document via a stream by file cabinet ID (`ImportDwxDocAsync`).
 
 
 ## Getting Started
@@ -33,3 +35,4 @@ Clone the repo and reference the project in your solution:
 
 ```bash
 git clone https://github.com/felixmk0/EasierDocuware.git
+
