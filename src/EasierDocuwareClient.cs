@@ -146,6 +146,24 @@ namespace EasierDocuware
         /// <returns>A <see cref="ServiceResult{DocumentFileDownload}"/> containing the file stream with other details or an error message.</returns>
         public Task<ServiceResult<DocumentFileDownload>> DownloadDocumentAsync(string fileCabinetId, int docId) => _documentService.DownloadDocumentAsync(fileCabinetId, docId);
 
+        /// <summary>
+        /// Exports a document as DWX asynchronously.
+        /// </summary>
+        /// <param name="fileCabinetId">The file cabinet ID.</param>
+        /// <param name="docId">The document ID.</param>
+        /// <param name="exportSettings">Settings for the export.</param>
+        /// <returns>A <see cref="ServiceResult{FileStream}"/> containing the exported DWX stream or an error message.</returns>
+        public Task<ServiceResult<FileStream>> ExportDocumentAsDwxAsync(string fileCabinetId, int docId, ExportSettings exportSettings) => _documentService.ExportDocumentAsDwxAsync(fileCabinetId, docId, exportSettings);
+
+        /// <summary>
+        /// Imports a DWX document asynchronously from a stream.
+        /// </summary>
+        /// <param name="fileCabinetId">The file cabinet ID.</param>
+        /// <param name="dwxStream">The DWX file stream.</param>
+        /// <param name="fileName">The file name for the temporary import.</param>
+        /// <returns>A <see cref="ServiceResult{List{int}}"/> containing the IDs of imported documents or an error message.</returns>
+        public Task<ServiceResult<List<int>>> ImportDwxDocAsync(string fileCabinetId, Stream dwxStream, string fileName) => _documentService.ImportDwxDocAsync(fileCabinetId, dwxStream, fileName);
+
 
 
         ////////////////////////////////////////////////////////////////////

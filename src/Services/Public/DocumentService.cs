@@ -3,7 +3,6 @@ using EasierDocuware.Interfaces.Internal;
 using EasierDocuware.Interfaces.Public;
 using EasierDocuware.Models;
 
-
 namespace EasierDocuware.Services.Internal
 {
     public class DocumentService : IDocumentService
@@ -24,5 +23,7 @@ namespace EasierDocuware.Services.Internal
         public Task<ServiceResult<List<DocumentIndexField>>> GetDocFieldsAsync(Document document) => _documentServiceInternal.GetDocFieldsAsync(document);
         public Task<ServiceResult<List<DocumentIndexField>>> GetDocFieldsAsync(string fileCabinetId, int docId) => _documentServiceInternal.GetDocFieldsAsync(fileCabinetId, docId);
         public Task<ServiceResult<DocumentFileDownload>> DownloadDocumentAsync(string fileCabinetId, int docId) => _documentServiceInternal.DownloadDocumentAsync(fileCabinetId, docId);
+        public Task<ServiceResult<FileStream>> ExportDocumentAsDwxAsync(string fileCabinetId, int docId, ExportSettings exportSettings) => _documentServiceInternal.ExportDocumentAsDwxAsync(fileCabinetId, docId, exportSettings);
+        public Task<ServiceResult<List<int>>> ImportDwxDocAsync(string fileCabinetId, Stream dwxStream, string fileName) => _documentServiceInternal.ImportDwxDocAsync(fileCabinetId, dwxStream, fileName);
     }
 }

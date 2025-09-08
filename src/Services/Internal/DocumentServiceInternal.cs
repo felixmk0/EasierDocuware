@@ -223,9 +223,80 @@ namespace EasierDocuware.Services.Internal
             }
         }
 
+        public async Task<ServiceResult<FileStream>> ExportDocumentAsDwxAsync(string fileCabinetId, int docId, ExportSettings exportSettings)
+        {
+            try
+            {
+                var docResult = await GetDocumentByIdAsync(fileCabinetId, docId);
+                if (!docResult.Success) return ServiceResult<FileStream>.Fail(docResult.Message!);
+                var doc = docResult.Data!;
+
+                string fileName = Guid.NewGuid().ToString() + ".dwx";
+                var fs = new FileStream(fileName, FileMode.OpenOrCreate);
+
+                using (var downloadResponse = await doc.PostToDownloadAsArchiveRelationForStreamAsync(exportSettings))
+                {
+                    if (!downloadResponse.IsSuccessStatusCode) return ServiceResult<FileStream>.Fail($"Download failed with status code {downloadResponse.StatusCode}: {downloadResponse.Exception.Message}");
+                    var download = downloadResponse.Content;
+
+                    await download.CopyToAsync(fs);
+                }
+
+                return ServiceResult<FileStream>.Ok(fs);
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<FileStream>.Fail(ex.Message);
+            }
+        }
+
+        public async Task<ServiceResult<List<int>>> ImportDwxDocAsync(string fileCabinetId, Stream dwxStream, string fileName)
+        {
+            string tempPath = Path.Combine(Path.GetTempPath(), fileName);
+
+            try
+            {
+                await using (var fileStream = new FileStream(tempPath, FileMode.Create, FileAccess.Write))
+                {
+                    await dwxStream.CopyToAsync(fileStream);
+                }
+
+                var fileCabinetResult = _fileCabinetServiceInternal.GetFileCabinetById(fileCabinetId);
+                if (!fileCabinetResult.Success) return ServiceResult<List<int>>.Fail(fileCabinetResult.Message!);
+                var fileCabinet = fileCabinetResult.Data!;
+
+                var importResult = fileCabinet.ImportArchive(new FileInfo(tempPath));
+                if (importResult == null) return ServiceResult<List<int>>.Fail("Import failed, no result returned.");
+
+                var errors = importResult.Results.Where(r => r.Status == ImportEntryStatus.Failed).Select((r, index) => $"Document {index + 1}: {r.ErrorMessage}").ToList();
+                if (errors.Any())
+                {
+                    string errorMessages = string.Join("; ", errors);
+                    return ServiceResult<List<int>>.Fail($"Import completed with errors: {errorMessages}");
+                }
+
+                var successCount = importResult.Results.Count(r => r.Status == ImportEntryStatus.Succeeded);
+                if (successCount == 0) return ServiceResult<List<int>>.Fail("Import failed, no documents were imported.");
+
+                var importedDocs = importResult.Results.Where(r => r.Status == ImportEntryStatus.Succeeded).SelectMany(r => r.EntryVersions).ToList();
+                var importedDocsIds = importedDocs.Select(d => d.Id).ToList();
+
+                return ServiceResult<List<int>>.Ok(importedDocsIds);
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<List<int>>.Fail(ex.Message);
+            }
+            finally
+            {
+                if (File.Exists(tempPath)) File.Delete(tempPath);
+            }
+        }
+
+
 
         // UTILITZA EL NOM INTERN DEL CAMP/COLUMNA DE LA DB)
-        // FALTA CANBIAR I MILLOR UTILITZAR DIALOG EXPRESSION
+        // FALTA CANVIAR I MILLOR UTILITZAR DIALOG EXPRESSION
         /*
         public async Task<ServiceResult<List<Document>>> SearchDocFieldsAsync(string fileCabinetId, Dictionary<string, object> fields)
         {

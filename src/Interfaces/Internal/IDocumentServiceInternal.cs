@@ -1,5 +1,6 @@
 ﻿using DocuWare.Platform.ServerClient;
 using EasierDocuware.Models;
+using System.Threading.Tasks;
 
 namespace EasierDocuware.Interfaces.Internal
 {
@@ -13,5 +14,7 @@ namespace EasierDocuware.Interfaces.Internal
         Task<ServiceResult<List<Document>>> GetDocumentsByFileCabinetIdAsync(string fileCabinetId, int? count = 10000);
         Task<ServiceResult<bool>> UpdateDocFieldsAsync(Document doc, Dictionary<string, string> fields, bool forceUpdate);
         Task<ServiceResult<DocumentFileDownload>> DownloadDocumentAsync(string fileCabinetId, int docId);
+        Task<ServiceResult<FileStream>> ExportDocumentAsDwxAsync(string fileCabinetId, int docId, ExportSettings exportSettings);
+        Task<ServiceResult<List<int>>> ImportDwxDocAsync(string fileCabinetId, Stream dwxStream, string fileName);
     }
 }
