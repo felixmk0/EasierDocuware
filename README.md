@@ -8,6 +8,7 @@ Additionally, EasierDocuWare includes extra features not available in the offici
 
 - [x] **Authentication**  
   - Connect to DocuWare server with credentials (`ConnectAsync`).
+  - Disconnect from the DocuWare server (`DisconnectAsync`).
 - [x] **Organizations**  
   - Retrieve default organization (`GetOrganization`).  
   - Retrieve all organizations (`GetOrganizationsAsync`).  
@@ -21,7 +22,8 @@ Additionally, EasierDocuWare includes extra features not available in the offici
   - Retrieve document fields by file cabinet and document ID (`GetDocFieldsAsync`).
   - Update single document fields (`UpdateDocFieldsAsync`).  
   - Batch update multiple documents (`BatchUpdateDocFieldsAsync`).
-  - Batch update multiple documents keyword index fields (`BatchUpdateKeywordIndexFieldsAsync`)
+  - Batch update multiple documents keyword index fields (`BatchUpdateKeywordIndexFieldsAsync`).
+  - Download a document (stream) by document and file cabinet ID (`DownloadDocumentAsync`).
 
 
 ## Getting Started
@@ -31,5 +33,3 @@ Clone the repo and reference the project in your solution:
 
 ```bash
 git clone https://github.com/felixmk0/EasierDocuware.git
-
-
