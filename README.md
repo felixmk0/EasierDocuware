@@ -8,6 +8,7 @@ Additionally, EasierDocuWare includes extra features not available in the offici
 
 - [x] **Authentication**  
   - Connect to DocuWare server with credentials (`ConnectAsync`).
+  - Connect to DocuWare via App Registration (`ConnectAppRegistrationAsync`).
   - Disconnect from the DocuWare server (`DisconnectAsync`).
 - [x] **Organizations**  
   - Retrieve default organization (`GetOrganization`).  
@@ -35,4 +36,5 @@ Clone the repo and reference the project in your solution:
 
 ```bash
 git clone https://github.com/felixmk0/EasierDocuware.git
+
 
