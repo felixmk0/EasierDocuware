@@ -8,7 +8,7 @@ It provides a clean, strongly-typed API with XML-documented services, making it 
 - [x] **Authentication**  
   - Connect to DocuWare server with credentials (`ConnectAsync`).
   - Connect to DocuWare via App Registration (`ConnectAppRegistrationAsync`).
-  - Disconnect from the DocuWare server (`DisconnectAsync`).
+  - Disconnect from the DocuWare server/App Registration (`DisconnectAsync`).
 - [x] **Organizations**  
   - Retrieve default organization (`GetOrganization`).  
   - Retrieve all organizations (`GetOrganizationsAsync`).  
