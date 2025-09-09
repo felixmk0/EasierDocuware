@@ -1,8 +1,7 @@
 # EasierDocuWare
 
 EasierDocuWare is a .NET library that simplifies working with the [DocuWare Platform SDK](https://developer.docuware.com/).  
-It provides a clean, strongly-typed API with XML-documented services, making it easy to connect, search, and manage documents, file cabinets & more.
-Additionally, EasierDocuWare includes extra features not available in the official SDK.
+It provides a clean, strongly-typed API with XML-documented services, making it easy to connect, search, and manage documents, file cabinets & more. Additionally, EasierDocuWare includes extra features not available in the official SDK.
 
 ## Features
 
@@ -31,10 +30,13 @@ Additionally, EasierDocuWare includes extra features not available in the offici
 
 ## Getting Started
 
+### Requirements
+- .NET 6.0 or higher
+- Access to a DocuWare server (cloud or on-premise)
+- Valid credentials
+
 ### Installation
 Clone the repo and reference the project in your solution:
 
 ```bash
 git clone https://github.com/felixmk0/EasierDocuware.git
-
-
