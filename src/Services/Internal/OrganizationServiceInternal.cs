@@ -1,7 +1,7 @@
 ﻿using DocuWare.Platform.ServerClient;
 using EasierDocuware.Interfaces;
 using EasierDocuware.Interfaces.Internal;
-using EasierDocuware.Models;
+using EasierDocuware.Models.Global;
 
 
 namespace EasierDocuware.Services.Internal

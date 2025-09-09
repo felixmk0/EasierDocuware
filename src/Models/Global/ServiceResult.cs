@@ -1,4 +1,4 @@
-﻿namespace EasierDocuware.Models
+﻿namespace EasierDocuware.Models.Global
 {
   public class ServiceResult<T>
   {

@@ -1,6 +1,8 @@
 ﻿using DocuWare.Platform.ServerClient;
 using EasierDocuware.Interfaces.Public;
-using EasierDocuware.Models;
+using EasierDocuware.Models.Auth;
+using EasierDocuware.Models.Documents;
+using EasierDocuware.Models.Global;
 
 
 namespace EasierDocuware
@@ -44,6 +46,13 @@ namespace EasierDocuware
         /// <param name="password">The password.</param>
         /// <returns>A <see cref="ServiceResult{bool}"/> indicating success or failure.</returns>
         public Task<ServiceResult<bool>> ConnectAsync(string url, string username, string password) => _authService.ConnectAsync(url, username, password);
+
+        /// <summary>
+        /// Connects to the DocuWare server using an app registration.
+        /// </summary>
+        /// <param name="appRegistration">The app registration object containing the credentials and configuration.</param>
+        /// <returns>A <see cref="ServiceResult{bool}"/> indicating success or failure.</returns>
+        public Task<ServiceResult<bool>> ConnectAppRegistrationAsync(AppRegistration appRegistration) => _authService.ConnectAppRegistrationAsync(appRegistration);
 
         /// <summary>
         /// Disconnects from the DocuWare server.
@@ -144,7 +153,7 @@ namespace EasierDocuware
         /// <param name="fileCabinetId">The file cabinet ID.</param>
         /// <param name="docId">The document ID.</param>
         /// <returns>A <see cref="ServiceResult{DocumentFileDownload}"/> containing the file stream with other details or an error message.</returns>
-        public Task<ServiceResult<DocumentFileDownload>> DownloadDocumentAsync(string fileCabinetId, int docId) => _documentService.DownloadDocumentAsync(fileCabinetId, docId);
+        public Task<ServiceResult<DocumentFileDownloadResult>> DownloadDocumentAsync(string fileCabinetId, int docId) => _documentService.DownloadDocumentAsync(fileCabinetId, docId);
 
         /// <summary>
         /// Exports a document as DWX asynchronously.

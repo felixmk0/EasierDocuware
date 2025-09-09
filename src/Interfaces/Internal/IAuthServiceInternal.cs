@@ -1,5 +1,5 @@
 ﻿using EasierDocuware.Interfaces.Public;
-using EasierDocuware.Models;
+using EasierDocuware.Models.Global;
 
 namespace EasierDocuware.Interfaces
 {

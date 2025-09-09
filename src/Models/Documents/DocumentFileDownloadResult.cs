@@ -1,6 +1,6 @@
-﻿namespace EasierDocuware.Models
+﻿namespace EasierDocuware.Models.Documents
 {
-    public class DocumentFileDownload
+    public class DocumentFileDownloadResult
     {
         public string ContentType { get; set; }
         public string FileName { get; set; }
