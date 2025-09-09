@@ -1,4 +1,5 @@
 ﻿using DocuWare.Platform.ServerClient;
+using EasierDocuware.Interfaces.Internal;
 using EasierDocuware.Interfaces.Public;
 using EasierDocuware.Models.Global;
 
@@ -7,15 +8,15 @@ namespace EasierDocuware.Services.Public
 {
     public class OrganizationService : IOrganizationService
     {
-        private readonly IOrganizationService _organizationService;
+        private readonly IOrganizationServiceInternal _internal;
 
-        public OrganizationService(IOrganizationService organizationService)
+        public OrganizationService(IOrganizationServiceInternal internalService)
         {
-            _organizationService = organizationService;
+            _internal = internalService;
         }
 
 
-        public ServiceResult<Organization> GetOrganization() => _organizationService.GetOrganization();
-        public Task<ServiceResult<List<Organization>>> GetOrganizationsAsync() => _organizationService.GetOrganizationsAsync();
+        public ServiceResult<Organization> GetOrganization() => _internal.GetOrganization();
+        public Task<ServiceResult<List<Organization>>> GetOrganizationsAsync() => _internal.GetOrganizationsAsync();
     }
 }

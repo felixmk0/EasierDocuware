@@ -1,6 +1,5 @@
 ﻿using EasierDocuware.Models.Auth;
 using EasierDocuware.Models.Global;
-using System.Threading.Tasks;
 
 namespace EasierDocuware.Interfaces.Public
 {

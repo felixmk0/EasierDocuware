@@ -1,21 +1,22 @@
 ﻿using DocuWare.Platform.ServerClient;
+using EasierDocuware.Interfaces.Internal;
 using EasierDocuware.Interfaces.Public;
 using EasierDocuware.Models.Global;
 
 
-namespace EasierDocuware.Services.Internal
+namespace EasierDocuware.Services.Public
 {
     public class FileCabinetService : IFileCabinetService
     {
-        private readonly IFileCabinetService _fileCabinetService;
+        private readonly IFileCabinetServiceInternal _internal;
 
-        public FileCabinetService(IFileCabinetService fileCabinetService)
+        public FileCabinetService(IFileCabinetServiceInternal internalService)
         {
-            _fileCabinetService = fileCabinetService;
+            _internal = internalService;
         }
 
+        public ServiceResult<FileCabinet> GetFileCabinetById(string fileCabinetId) => _internal.GetFileCabinetById(fileCabinetId);
 
-        public ServiceResult<FileCabinet> GetFileCabinetById(string fileCabinetId) => _fileCabinetService.GetFileCabinetById(fileCabinetId);
-        public Task<ServiceResult<List<FileCabinet>>> GetFileCabinetsAsync() => _fileCabinetService.GetFileCabinetsAsync();
+        public Task<ServiceResult<List<FileCabinet>>> GetFileCabinetsAsync() => _internal.GetFileCabinetsAsync();
     }
 }

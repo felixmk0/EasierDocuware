@@ -1,8 +1,11 @@
 ﻿using DocuWare.Platform.ServerClient;
+using EasierDocuware.Interfaces.Internal;
 using EasierDocuware.Interfaces.Public;
 using EasierDocuware.Models.Auth;
 using EasierDocuware.Models.Documents;
 using EasierDocuware.Models.Global;
+using EasierDocuware.Services.Internal;
+using EasierDocuware.Services.Public;
 
 
 namespace EasierDocuware
@@ -18,18 +21,17 @@ namespace EasierDocuware
         private readonly IDocumentService _documentService;
         private readonly IOrganizationService _organizationService;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="EasierDocuwareClient"/> class.
-        /// </summary>
-        /// <param name="authService">The authentication service.</param>
-        /// <param name="fileCabinetService">The file cabinet service.</param>
-        /// <param name="documentService">The document service.</param>
-        public EasierDocuwareClient(IAuthService authService, IFileCabinetService fileCabinetService, IDocumentService documentService, IOrganizationService organizationService)
+        public EasierDocuwareClient()
         {
-            _authService = authService;
-            _fileCabinetService = fileCabinetService;
-            _documentService = documentService;
-            _organizationService = organizationService;
+            var authServiceInternal = new AuthServiceInternal(serviceConnection: null!);
+            var fileCabinetServiceInternal = new FileCabinetServiceInternal(authServiceInternal);
+            var documentServiceInternal = new DocumentServiceInternal(authServiceInternal, fileCabinetServiceInternal);
+            var organizationServiceInternal = new OrganizationServiceInternal(authServiceInternal);
+
+            _authService = new AuthService(authServiceInternal); 
+            _fileCabinetService = new FileCabinetService(fileCabinetServiceInternal); 
+            _documentService = new DocumentService(documentServiceInternal);
+            _organizationService = new OrganizationService(organizationServiceInternal);
         }
 
 

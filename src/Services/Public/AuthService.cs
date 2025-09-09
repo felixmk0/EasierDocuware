@@ -1,5 +1,4 @@
-﻿using EasierDocuware.Interfaces;
-using EasierDocuware.Interfaces.Public;
+﻿using EasierDocuware.Interfaces.Public;
 using EasierDocuware.Models.Auth;
 using EasierDocuware.Models.Global;
 
