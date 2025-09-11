@@ -11,7 +11,7 @@ namespace EasierDocuware.Services.Public
     {
         private readonly IDocumentServiceInternal _internal;
 
-        public DocumentService(IDocumentServiceInternal internalService)    
+        public DocumentService(IDocumentServiceInternal internalService)
         {
             _internal = internalService;
         }
@@ -27,5 +27,8 @@ namespace EasierDocuware.Services.Public
         public Task<ServiceResult<DocumentFileDownloadResult>> DownloadDocumentAsync(string fileCabinetId, int docId) => _internal.DownloadDocumentAsync(fileCabinetId, docId);
         public Task<ServiceResult<FileStream>> ExportDocumentAsDwxAsync(string fileCabinetId, int docId, ExportSettings exportSettings) => _internal.ExportDocumentAsDwxAsync(fileCabinetId, docId, exportSettings);
         public Task<ServiceResult<List<int>>> ImportDwxDocAsync(string fileCabinetId, Stream dwxStream, string fileName) => _internal.ImportDwxDocAsync(fileCabinetId, dwxStream, fileName);
+        public Task<ServiceResult<bool>> ValidateDocDateFieldAsync(string fileCabinetId, int docId, string dateFieldName) => _internal.ValidateDocDateFieldAsync(fileCabinetId, docId, dateFieldName);
+        public Task<ServiceResult<List<Document>>> GetDuplicateDocsAsync(string fileCabinetId, Dictionary<string, object> fields) => _internal.GetDuplicateDocsAsync(fileCabinetId, fields);
+        public Task<ServiceResult<List<int>>> GetDuplicateDocsIdsAsync(string fileCabinetId, Dictionary<string, object> fields) => _internal.GetDuplicateDocsIdsAsync(fileCabinetId, fields);
     }
 }

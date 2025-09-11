@@ -20,7 +20,6 @@ namespace EasierDocuware.Services.Internal
         }
 
 
-        // FALTA IMPLEMENTAR GESTIÓ D ERRORS AMB LA REPOSTA HTTP DE DW
         public async Task<ServiceResult<List<Document>>> GetDocumentsByFileCabinetIdAsync(string fileCabinetId, int? count = 10000)
         {
             try
@@ -197,6 +196,161 @@ namespace EasierDocuware.Services.Internal
             }
         }
 
+
+        public async Task<ServiceResult<DocumentIndexFields>> UpdateTableFieldsAsync(Document document, string fieldName)
+        {
+            try
+            {
+                DocumentIndexField tableIndexField = document.Fields.FirstOrDefault(f => f.FieldName == fieldName && f.ItemElementName == ItemChoiceType.Table);
+
+                if (tableIndexField != null && !tableIndexField.IsNull)
+                {
+                    DocumentIndexFieldTable existingTableField = tableIndexField.Item as DocumentIndexFieldTable;
+
+                    if (existingTableField?.Row.Count > 0)
+                    {
+                        DocumentIndexFieldTableRow documentIndexFieldTableRow =
+                            existingTableField.Row.FirstOrDefault(r =>
+                                r.ColumnValue
+                                    .Exists(c => c.FieldName == "INVOI_POSITION"
+                                        && (decimal)c.Item == 1m));
+
+                        DocumentIndexField columnIndexFieldAmount =
+                            documentIndexFieldTableRow?.ColumnValue
+                                .FirstOrDefault(c => c.FieldName == "INVOI_AMOUNT");
+
+                        if (columnIndexFieldAmount != null)
+                        {
+                            //Set for single entry a new price
+                            columnIndexFieldAmount.Item = 30m;
+                        }
+                        else
+                        {
+                            //Use dedicated exception in production code!
+                            throw new Exception("Column not found!");
+                        }
+                    }
+                    else
+                    {
+                        //Use dedicated exception in production code!
+                        throw new Exception("No table field rows available!");
+                    }
+
+                }
+                else
+                {
+                    //Use dedicated exception in production code!
+                    throw new Exception("Table field does not exist!");
+                }
+
+                //Due to reference types we can just take the fields list
+                //from original provided document object
+                DocumentIndexFields updatedTableIndexFields = new DocumentIndexFields()
+                {
+                    Field = document.Fields
+                };
+
+                //IMPORTANT: Send always ALL table fields to the server.
+                //Also in case only a single column value was updated,
+                //Otherwise all other table field entries get deleted!
+                var result = await document.PutToFieldsRelationForDocumentIndexFieldsAsync(updatedTableIndexFields);
+                if (!result.IsSuccessStatusCode) return ServiceResult<DocumentIndexFields>.Fail($"Update failed with status code {result.StatusCode}: {result.Exception.Message}");
+
+                return ServiceResult<DocumentIndexFields>.Ok(updatedTableIndexFields);
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<DocumentIndexFields>.Fail(ex.Message);
+            }
+        }
+
+
+        public async Task<ServiceResult<bool>> ValidateDocDateFieldAsync(string fileCabinetId, int docId, string dateFieldName)
+        {
+            try
+            {
+                var docResult = await GetDocumentByIdAsync(fileCabinetId, docId);
+                if (!docResult.Success) return ServiceResult<bool>.Fail(docResult.Message!);
+                var document = docResult.Data!;
+
+                var docFieldsResult = await GetDocFieldsAsync(document);
+                if (!docFieldsResult.Success) return ServiceResult<bool>.Fail(docFieldsResult.Message!);
+                var docFields = docFieldsResult.Data!;
+
+                var dateField = docFields.FirstOrDefault(f => f.FieldName == dateFieldName);
+                if (dateField == null) return ServiceResult<bool>.Fail("Date field not found in the document.");
+
+                var dateValue = dateField.Item as DateTime?;
+                if (dateValue == null || !dateValue.HasValue) return ServiceResult<bool>.Fail("Date field value is null or not a valid date.");
+                var currentDate = DateTime.Now;
+                if (dateValue.Value.Date > currentDate.Date) return ServiceResult<bool>.Fail("The date field value is in the future.");
+
+                return ServiceResult<bool>.Ok(true);
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<bool>.Fail(ex.Message);
+            }
+        }
+
+        public async Task<ServiceResult<List<Document>>> GetDuplicateDocsAsync(string fileCabinetId, Dictionary<string, object> fields)
+        {
+            try
+            {
+                var docsResult = await GetDocumentsByFileCabinetIdAsync(fileCabinetId);
+                if (!docsResult.Success) return ServiceResult<List<Document>>.Fail(docsResult.Message!);
+
+                var docs = docsResult.Data!;
+                var duplicateDocs = new List<Document>();
+
+                foreach (var doc in docs)
+                {
+                    bool matchesAll = true;
+                    foreach (var field in fields)
+                    {
+                        bool hasMatch = doc.Fields.Any(f => f.FieldName == field.Key && f.Item == field.Value);
+                        if (!hasMatch)
+                        {
+                            matchesAll = false;
+                            break;
+                        }
+                    }
+
+                    if (matchesAll) duplicateDocs.Add(doc);
+                }
+
+                return ServiceResult<List<Document>>.Ok(duplicateDocs);
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<List<Document>>.Fail(ex.Message);
+            }
+        }
+
+        public async Task<ServiceResult<List<int>>> GetDuplicateDocsIdsAsync(string fileCabinetId, Dictionary<string, object> fields)
+        {
+            try
+            {
+                var duplicateDocs = await GetDuplicateDocsAsync(fileCabinetId, fields);
+                if (!duplicateDocs.Success) return ServiceResult<List<int>>.Fail(duplicateDocs.Message!);
+
+                var docs = duplicateDocs.Data!;
+                var duplicateDocsIds = new List<int>();
+
+                docs.ForEach(doc =>
+                {
+                    duplicateDocsIds.Add(doc.Id);
+                });
+
+                return ServiceResult<List<int>>.Ok(duplicateDocsIds);
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<List<int>>.Fail(ex.Message);
+            }
+        }
+
+
         public async Task<ServiceResult<DocumentFileDownloadResult>> DownloadDocumentAsync(string fileCabinetId, int docId)
         {
             try
@@ -295,41 +449,33 @@ namespace EasierDocuware.Services.Internal
         }
 
 
-
-        // UTILITZA EL NOM INTERN DEL CAMP/COLUMNA DE LA DB)
-        // FALTA CANVIAR I MILLOR UTILITZAR DIALOG EXPRESSION
-        /*
-        public async Task<ServiceResult<List<Document>>> SearchDocFieldsAsync(string fileCabinetId, Dictionary<string, object> fields)
+        private static async Task<ServiceResult<List<Document>>> GetAllDocumentsAsync(DocumentsQueryResult queryResult, List<Document> documents)
         {
             try
             {
-                var fileCabinetDocsResult = await GetDocumentsByFileCabinetIdAsync(fileCabinetId);
-                if (!fileCabinetDocsResult.Success) return ServiceResult<List<Document>>.Fail(fileCabinetDocsResult.Message!);
+                documents.AddRange(queryResult.Items);
 
-                var docs = fileCabinetDocsResult.Data!;
+                if (queryResult.NextRelationLink != null)
+                {
+                    var queryResultResponse = await queryResult.GetDocumentsQueryResultFromNextRelationAsync();
 
-                var matchedDocs = docs.Where(d => fields.All(f =>
-                    d.Fields.Any(df => df.FieldName == f.Key && df.Item == f.Value)
-                )).ToList();
+                    if (!queryResultResponse.IsSuccessStatusCode)
+                    {
+                        return ServiceResult<List<Document>>.Fail(
+                            $"Failed to get next page of documents. " + $"Status code: {queryResultResponse.StatusCode}, " + $"Message: {queryResultResponse.Exception?.Message}"
+                        );
+                    }
 
-                if (matchedDocs.IsNullOrEmpty()) return ServiceResult<List<Document>>.Fail("No documents matched the search criteria.");
+                    return await GetAllDocumentsAsync(queryResultResponse, documents);
+                }
 
-                return ServiceResult<List<Document>>.Ok(matchedDocs);
+                return ServiceResult<List<Document>>.Ok(documents);
             }
             catch (Exception ex)
             {
                 return ServiceResult<List<Document>>.Fail(ex.Message);
             }
         }
-        */
-
-
-        private static async Task GetAllDocumentsAsync(DocumentsQueryResult queryResult, List<Document> documents)
-        {
-            documents.AddRange(queryResult.Items);
-            if (queryResult.NextRelationLink != null) await GetAllDocumentsAsync(await queryResult.GetDocumentsQueryResultFromNextRelationAsync(), documents);
-        }
-
 
         private static async Task<ServiceResult<DocumentFileDownloadResult>> DownloadDocumentContentAsync(Document document)
         {

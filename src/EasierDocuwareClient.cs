@@ -28,8 +28,8 @@ namespace EasierDocuware
             var documentServiceInternal = new DocumentServiceInternal(authServiceInternal, fileCabinetServiceInternal);
             var organizationServiceInternal = new OrganizationServiceInternal(authServiceInternal);
 
-            _authService = new AuthService(authServiceInternal); 
-            _fileCabinetService = new FileCabinetService(fileCabinetServiceInternal); 
+            _authService = new AuthService(authServiceInternal);
+            _fileCabinetService = new FileCabinetService(fileCabinetServiceInternal);
             _documentService = new DocumentService(documentServiceInternal);
             _organizationService = new OrganizationService(organizationServiceInternal);
         }
@@ -174,6 +174,22 @@ namespace EasierDocuware
         /// <param name="fileName">The file name for the temporary import.</param>
         /// <returns>A <see cref="ServiceResult{List{int}}"/> containing the IDs of imported documents or an error message.</returns>
         public Task<ServiceResult<List<int>>> ImportDwxDocAsync(string fileCabinetId, Stream dwxStream, string fileName) => _documentService.ImportDwxDocAsync(fileCabinetId, dwxStream, fileName);
+
+        /// <summary>
+        /// Finds duplicate documents by matching field values asynchronously.
+        /// </summary>
+        /// <param name="fileCabinetId">The file cabinet ID.</param>
+        /// <param name="fields">Fields and values to check for duplicates.</param>
+        /// <returns>A <see cref="ServiceResult{List{Document}}"/> containing duplicate documents or an error message.</returns>
+        public Task<ServiceResult<List<Document>>> GetDuplicateDocsAsync(string fileCabinetId, Dictionary<string, object> fields) => _documentService.GetDuplicateDocsAsync(fileCabinetId, fields);
+
+        /// <summary>
+        /// Finds IDs of duplicate documents by matching field values asynchronously.
+        /// </summary>
+        /// <param name="fileCabinetId">The file cabinet ID.</param>
+        /// <param name="fields">Fields and values to check for duplicates.</param>
+        /// <returns>A <see cref="ServiceResult{List{int}}"/> containing IDs of duplicate documents or an error message.</returns>
+        public Task<ServiceResult<List<int>>> GetDuplicateDocsIdsAsync(string fileCabinetId, Dictionary<string, object> fields) => _documentService.GetDuplicateDocsIdsAsync(fileCabinetId, fields);
 
 
 
