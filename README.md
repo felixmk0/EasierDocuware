@@ -8,7 +8,7 @@ It provides a clean, strongly-typed API with XML-documented services, making it 
 - [x] **Authentication**  
   - Connect to DocuWare server with credentials (`ConnectAsync`).
   - Connect to DocuWare via App Registration (`ConnectAppRegistrationAsync`).
-  - Disconnect from the DocuWare server/App Registration (`DisconnectAsync`).
+  - Disconnect from the DocuWare Server/App Registration (`DisconnectAsync`).
 - [x] **Organizations**  
   - Retrieve default organization (`GetOrganization`).  
   - Retrieve all organizations (`GetOrganizationsAsync`).  
@@ -26,6 +26,9 @@ It provides a clean, strongly-typed API with XML-documented services, making it 
   - Download a document (stream) by document and file cabinet ID (`DownloadDocumentAsync`).
   - Export a document as a DWX file by document and file cabinet ID (`ExportDocumentAsDwxAsync`).
   - Import a DWX document via a stream by file cabinet ID (`ImportDwxDocAsync`).
+  - Validate a document's date field (`ValidateDocDateFieldAsync`).
+  - Find duplicate documents by matching field values (`GetDuplicateDocsAsync`).
+  - Find duplicate document IDs by matching field values (`GetDuplicateDocsIdsAsync`).
 
 
 ## Getting Started
@@ -40,4 +43,3 @@ Clone the repo and reference the project in your solution:
 
 ```bash
 git clone https://github.com/felixmk0/EasierDocuware.git
-
