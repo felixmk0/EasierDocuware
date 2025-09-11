@@ -64,18 +64,38 @@ namespace EasierDocuware.Services.Internal
             }
         }
 
-        public async Task<ServiceResult<bool>> UpdateDocFieldsAsync(Document doc, Dictionary<string, string> fields, bool forceUpdate)
+        public async Task<ServiceResult<bool>> CreateDocAsync(string fileCabinetId, List<DocumentIndexField> fields)
+        {
+            try
+            {
+                var fileCabinetResult = _fileCabinetServiceInternal.GetFileCabinetById(fileCabinetId);
+                if (!fileCabinetResult.Success) return ServiceResult<bool>.Fail(fileCabinetResult.Message!);
+
+                var fileCabinet = fileCabinetResult.Data!;
+                var newDoc = new Document
+                {
+                    Fields = fields
+                };
+
+                var response = await fileCabinet.PostToDocumentsRelationForDocumentAsync(newDoc);
+                if (!response.IsSuccessStatusCode) return ServiceResult<bool>.Fail($"Create document failed with status code {response.StatusCode}: {response.Exception.Message}");
+
+                return ServiceResult<bool>.Ok(true);
+            }
+            catch (Exception ex)
+            {
+                return ServiceResult<bool>.Fail(ex.Message);
+            }
+        }
+
+        public async Task<ServiceResult<bool>> UpdateDocFieldsAsync(Document doc, List<DocumentIndexField> fields, bool forceUpdate)
         {
             try
             {
                 if (doc == null || fields.IsNullOrEmpty()) return ServiceResult<bool>.Fail("Parameteres cannot be null!");
-
-                var docFields = new List<DocumentIndexField>();
-                foreach (var field in fields) docFields.Add(DocumentIndexField.Create(field.Key, field.Value));
-
                 var updateIndexFieldsInfo = new UpdateIndexFieldsInfo()
                 {
-                    Field = docFields,
+                    Field = fields,
                     ForceUpdate = forceUpdate
                 };
 
@@ -90,20 +110,16 @@ namespace EasierDocuware.Services.Internal
             }
         }
 
-        public async Task<ServiceResult<bool>> BatchUpdateDocFieldsAsync(string fileCabinetId, List<int> documentIds, Dictionary<string, string> fields, bool forceUpdate)
+        public async Task<ServiceResult<bool>> BatchUpdateDocFieldsAsync(string fileCabinetId, List<int> documentIds, List<DocumentIndexField> fields, bool forceUpdate)
         {
             try
             {
                 if (documentIds.IsNullOrEmpty() || fields.IsNullOrEmpty() || fileCabinetId.IsNullOrEmpty()) return ServiceResult<bool>.Fail("Parameteres cannot be null!");
-
-                var docFields = new List<DocumentIndexField>();
-                foreach (var field in fields) docFields.Add(DocumentIndexField.Create(field.Key, field.Value));
-
                 var batchUpdateProcess = new BatchUpdateProcess
                 {
                     Data = new BatchUpdateProcessData
                     {
-                        Field = docFields,
+                        Field = fields,
                         ForceUpdate = forceUpdate
                     },
                     Source = new BatchUpdateDocumentsSource
@@ -195,75 +211,6 @@ namespace EasierDocuware.Services.Internal
                 return ServiceResult<List<DocumentIndexField>>.Fail(ex.Message);
             }
         }
-
-
-        public async Task<ServiceResult<DocumentIndexFields>> UpdateTableFieldsAsync(Document document, string fieldName)
-        {
-            try
-            {
-                DocumentIndexField tableIndexField = document.Fields.FirstOrDefault(f => f.FieldName == fieldName && f.ItemElementName == ItemChoiceType.Table);
-
-                if (tableIndexField != null && !tableIndexField.IsNull)
-                {
-                    DocumentIndexFieldTable existingTableField = tableIndexField.Item as DocumentIndexFieldTable;
-
-                    if (existingTableField?.Row.Count > 0)
-                    {
-                        DocumentIndexFieldTableRow documentIndexFieldTableRow =
-                            existingTableField.Row.FirstOrDefault(r =>
-                                r.ColumnValue
-                                    .Exists(c => c.FieldName == "INVOI_POSITION"
-                                        && (decimal)c.Item == 1m));
-
-                        DocumentIndexField columnIndexFieldAmount =
-                            documentIndexFieldTableRow?.ColumnValue
-                                .FirstOrDefault(c => c.FieldName == "INVOI_AMOUNT");
-
-                        if (columnIndexFieldAmount != null)
-                        {
-                            //Set for single entry a new price
-                            columnIndexFieldAmount.Item = 30m;
-                        }
-                        else
-                        {
-                            //Use dedicated exception in production code!
-                            throw new Exception("Column not found!");
-                        }
-                    }
-                    else
-                    {
-                        //Use dedicated exception in production code!
-                        throw new Exception("No table field rows available!");
-                    }
-
-                }
-                else
-                {
-                    //Use dedicated exception in production code!
-                    throw new Exception("Table field does not exist!");
-                }
-
-                //Due to reference types we can just take the fields list
-                //from original provided document object
-                DocumentIndexFields updatedTableIndexFields = new DocumentIndexFields()
-                {
-                    Field = document.Fields
-                };
-
-                //IMPORTANT: Send always ALL table fields to the server.
-                //Also in case only a single column value was updated,
-                //Otherwise all other table field entries get deleted!
-                var result = await document.PutToFieldsRelationForDocumentIndexFieldsAsync(updatedTableIndexFields);
-                if (!result.IsSuccessStatusCode) return ServiceResult<DocumentIndexFields>.Fail($"Update failed with status code {result.StatusCode}: {result.Exception.Message}");
-
-                return ServiceResult<DocumentIndexFields>.Ok(updatedTableIndexFields);
-            }
-            catch (Exception ex)
-            {
-                return ServiceResult<DocumentIndexFields>.Fail(ex.Message);
-            }
-        }
-
 
         public async Task<ServiceResult<bool>> ValidateDocDateFieldAsync(string fileCabinetId, int docId, string dateFieldName)
         {

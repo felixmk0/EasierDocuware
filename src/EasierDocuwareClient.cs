@@ -191,6 +191,14 @@ namespace EasierDocuware
         /// <returns>A <see cref="ServiceResult{List{int}}"/> containing IDs of duplicate documents or an error message.</returns>
         public Task<ServiceResult<List<int>>> GetDuplicateDocsIdsAsync(string fileCabinetId, Dictionary<string, object> fields) => _documentService.GetDuplicateDocsIdsAsync(fileCabinetId, fields);
 
+        /// <summary>
+        /// Creates a new document in a file cabinet asynchronously.
+        /// </summary>
+        /// <param name="fileCabinetId">The file cabinet ID.</param>
+        /// <param name="fields">The list of index fields for the document.</param>
+        /// <returns>A <see cref="ServiceResult{bool}"/> indicating success or failure.</returns>
+        public Task<ServiceResult<bool>> CreateDocAsync(string fileCabinetId, List<DocumentIndexField> fields) => _documentService.CreateDocAsync(fileCabinetId, fields);
+
 
 
         ////////////////////////////////////////////////////////////////////
